@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>ADD</title>
+        <script type="text/javascript" src="/static/jquery.min.js"></script>
+		<style>
+			:root{
+				--color:230;
+				--first:hsl(var(--color),69%,61%);
+				--text:hsl(var(--color),8%,65%);
+				--input:hsl(var(--color),70%,96%);
+				--title:hsl(var(--color),8%,15%);
+			}
+			*{
+				padding: 0;
+				margin: 0;
+				box-sizing: border-box;
+			}
+			a{
+				text-decoration: none;
+			}
+			.title{
+				font-size: 2.25rem;
+			}
+			.section{
+				padding: 6rem 0 2rem;
+			}
+			.container{
+				position: absolute;
+				width: 500px;
+				height:300px;
+				left: 0;
+				right: 0;
+				margin: 0 auto;
+				cursor: pointer;
+				display: grid;
+				grid-template-columns: repeat(2, 1fr);
+			}
+			.subtitle{
+				display: block;
+				font-size: .875rem;
+				margin-bottom: 4rem;
+			}
+			div{
+				padding: 10px 0;
+				dispayer: block;
+			}
+			.grid{
+				display: grid;
+				gap: 1.5rem;
+			}
+			.title,
+			.subtitle{
+				text-align: center;
+			}
+			.contact_content{
+				background-color: var(--input);
+				border-radius: .5rem;
+				padding: .75rem 1rem .25rem;
+			}
+			.label{
+				font-size: .75rem;
+				color: var(--title);
+			}
+			.label_{
+				font-size: .75rem;
+				color: var(--title);
+			}
+			label.label_:before {
+				content: '* ';
+				color: red;
+			}
+			.form{
+				width: 480px;
+			}
+			.input{
+				width: 100%;
+				background-color: var(--input);
+				color: var(--text);
+				font-family: 'PT Serif',serif;
+				font-size: .938rem;
+				border: none;
+				outline: none;
+				padding: .25rem 0 .5rem;
+			}
+			.inputs{
+				grid-template-columns: repeat(1, 1fr);
+			}
+			.button{
+				position: absolute;
+				width: 80px;
+				height:50px;
+				left: 0;
+				right: 0;
+				margin: 0 auto;
+				display: inline-block;
+				background-color: var(--first);
+				color: #fff;
+				padding: 1rem;
+				border-radius: .5rem;
+				font-weight: 500;
+				display: inline-flex;
+				align-items: center;
+			}
+			.input:invalid+span:after {
+			  content: '✖';
+			}
+
+			.input:valid+span:after {
+			  content: '✓';
+			}
+		</style>
+        <script type="text/javaScript">
+			function init(){
+				var city = [
+						[],
+						["France", "Germany", "Ireland", "Spain", "Switzerland", "UK"],
+						["Canada", "Mexico", "USA"]
+					];
+					var region = document.getElementById("region");
+					var country = document.getElementById("country");
+
+					region.onchange = function(){
+
+						country.length = 1;
+						console.log(this.selectedIndex);
+
+						var index = this.selectedIndex;
+						var a = city[index];
+
+						for(var i = 0;i < a.length;i++){
+							var option = new Option();
+
+							option.value = a[i];
+							option.innerHTML = a[i];
+							console.log(a[i]);
+							country.appendChild(option);
+						}
+					}
+			}
+		</script>
+	</head>
+	<body>
+		<section class = "section">
+			<h2 class="title">ADD</h2>
+			<div class="container">
+				<form action="" class="form grid">
+					<div class="inputs grid">
+						<div class="contact_content">
+							<label for ="" class="label_">Name</label>
+							<input id="name_id" type="text" class="input" >
+						</div>
+						<div class="contact_content">
+							<label for ="" class="label_">Email</label>
+							<input id="email_id" type="text" class="input" >
+						</div>
+						<div class="contact_content">
+							<label for ="" class="label">Region</label>
+							<select id="region" name="region" class="input" onchange="init()">
+								<option value="">Select Region</option>
+							    <option value="EU">EU</option>
+							    <option value="US">US</option>
+							</select>
+						</div>
+						<div class="contact_content">
+							<label for ="" class="label">Location</label>
+							<select id="country" name="country" class="input" >
+								<option value="">Select Country</option>
+							</select>
+						</div>
+						<div class="contact_content">
+							<label for ="" class="label">Date</label>
+							<input id="date" type="date" class="input" >
+						</div>
+						<div class="contact_content">
+							<label for ="" class="label">Time（06:00 ~ 23:00）</label>
+							<input id="time" type="time" class="input" min="06:00" max="22:00" required>
+							<span class="validity"></span>
+						</div>
+						<div>
+							<a href="" class="button" onclick="add()">
+								Submit
+							</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</section>
+	</body>
+</html>
