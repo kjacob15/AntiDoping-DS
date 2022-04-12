@@ -30,7 +30,7 @@ def hello():
        return redirect(url_for('index'))
 
 @app.route('/register_athlete', methods=['POST'])
-def registerAthlete():
+def register_athlete():
     
     response = {}
 
