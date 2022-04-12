@@ -57,15 +57,16 @@ def register_athlete():
 
         email_ = request.form['email']
         name_ = request.form['name']
+        region= request.form['region']
         location_ = request.form['location']
         time_= request.form['time']
-        date_ = today.strftime("%d/%m/%Y")
+        date_ = request.form['date']
 
+        if(region=='EU'):
+            athlete_collection = db['EU_athlete']
+        else:
+            athlete_collection = db['US_athlete']
 
-        athlete_collection = db['athlete']
-
-
-        query = {"email":email_}
         values= athlete_collection.find({ "email": { "$eq": email_} })
         if(len(list(values))>0):
             response['status'] = 400
@@ -86,6 +87,136 @@ def register_athlete():
         response['status'] = 400
         response['message'] = 'Athlete could not be registered'
         return jsonify(response)
+
+#POST API to delete athlete info
+@app.route('/delete_athlete', methods=["POST"])
+def deleteAthlete():
+
+    response = {}
+
+    try:
+        email_ = request.form['email']
+
+        athlete_collection = db['EU_athlete']
+        print(email_)
+        query = {"email":email_}
+        print(query)
+        values = athlete_collection.find(query)
+        if(not len(list(values))>0):
+            athlete_collection = db['US_athlete']
+            values = athlete_collection.find(query)
+        print(values[0])
+        for i in values:
+            print(i)
+            athlete_collection.delete_one(i)
+        
+
+        response['status'] = 200
+        response['message'] = 'Athelete deleted successfully'
+        return jsonify(response)
+
+    except Exception as e:
+        print(e)
+        response['status'] = 400
+        response['message'] = 'Athelete could not be deleted'
+        return jsonify(response)
+
+#POST API to Modify the athlete availability
+@app.route('/edit_availability', methods=["POST"])
+def edit_availability():
+
+    response = {}
+
+    try:
+        email_ = request.form['email']
+        time_=request.form['time']
+
+        athlete_collection = db['EU_athlete']
+
+        query = {"email":email_}
+        values= athlete_collection.find(query)
+        
+        if(not len(list(values))>0):
+            athlete_collection = db['US_athlete']
+            values= athlete_collection.find(query)
+
+        newvalues = { "$set": { "time": time_ } }
+        athlete_collection.update_one(values[0], newvalues)
+
+        response['status'] = 200
+        response['message'] = 'Athelete availability updated'
+        return jsonify(response)
+
+    except Exception as e:
+        response['status'] = 400
+        response['message'] = 'Athelete update FAILED'
+        return jsonify(response)
+
+#GET API to find all athletes in a region
+@app.route('/find_athletes_loc', methods=['GET'])
+def find_athletes_loc():
+    response={}
+    try:
+        
+        location = request.args.get('location')
+        athlete_collection = db['athlete']
+
+        # if(not email_):
+        #     email_=""
+
+        # Query the DB
+        athletes = athlete_collection.find({"location": location})
+        athletes_info = {}
+
+        count = 0
+        for athlete in athletes:
+            count += 1
+            athlete_info = {}
+            athlete_info['email'] = athlete['email']
+            athlete_info['name'] = athlete['name']
+            athlete_info['location'] = athlete['location']
+            athlete_info['date'] = athlete['date']
+            athlete_info['time'] = athlete['time']
+            athlete_index = 'athlete' + str(count)
+            athletes_info[athlete_index] = athlete_info
+        return jsonify(athletes_info)
+    except Exception as e:
+        print(e)
+        response['message']= "Request failed" +e
+        return response
+
+#GET API to find athlete by email
+@app.route('/find_athletes', methods=['GET'])
+def find_athletes():
+    response={}
+    try:
+        
+        email_ = request.args.get('email')
+        athlete_collection = db['athlete']
+
+        # if(not email_):
+        #     email_=""
+
+        # Query the DB
+        athletes = athlete_collection.find({"email": email_})
+        athletes_info = {}
+
+        count = 0
+        for athlete in athletes:
+            count += 1
+            athlete_info = {}
+            athlete_info['email'] = athlete['email']
+            athlete_info['name'] = athlete['name']
+            athlete_info['location'] = athlete['location']
+            athlete_info['date'] = athlete['date']
+            athlete_info['time'] = athlete['time']
+            athlete_index = 'athlete' + str(count)
+            athletes_info[athlete_index] = athlete_info
+        return jsonify(athletes_info)
+    except Exception as e:
+        print(e)
+        response['message']= "Request failed" +e
+        return response
 
 
 

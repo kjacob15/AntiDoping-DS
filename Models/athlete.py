@@ -22,5 +22,6 @@ class Athlete():
         athelte_info['location'] = str(self.location)
         athelte_info['date'] = str(self.date)
         athelte_info['time'] = str(self.time)
+        athelte_info['isAuditAssigned']= self.isAuditAssigned
         
         return athelte_info
