@@ -5,16 +5,14 @@ class ADO():
     location = ''
     assigned_athletes = []
 
-    def __init__(self, email, name, location):
+    def __init__(self, email, location):
         self.email = email
-        self.name = name
         self.location = location
         self.assigned_athletes = []
     
     def make_dict(self):
         audit_info = {}
         audit_info['email'] = self.email
-        audit_info['name'] = self.name
         audit_info['location'] = self.location
         audit_info['assigned_athletes'] = self.assigned_athletes
         return audit_info
