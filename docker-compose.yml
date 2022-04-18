@@ -1,0 +1,46 @@
+version: '3'
+services:
+  api:
+    container_name: "userapi"
+    image:
+      journey_sharing_app:v1
+    entrypoint: python app.py
+    ports:
+        - '5000:5000'
+    volumes:
+      - .:/app
+  api2:
+    container_name: "userapi2"
+    image:
+      journey_sharing_app:v1
+    entrypoint: python app.py
+    ports:
+        - '5001:5000'
+    volumes:
+      - .:/app
+  api3:
+    container_name: "userapi3"
+    image:
+      journey_sharing_app:v1
+    entrypoint: python app.py
+    ports:
+        - '5002:5000'
+    volumes:
+      - .:/app
+  api4:
+    container_name:
+     "userapi4"
+    image: 
+      journey_sharing_app:v1
+    entrypoint: python app.py
+    ports:
+        - '5003:5000'
+    volumes:
+      - .:/app
+      
+  reoutehandler:
+    image: nginix_route_handler:1.0.0
+    ports:
+      - 80:80
+
+

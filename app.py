@@ -1,3 +1,4 @@
+from constants import FLASK_HOSTNAME, FLASK_PORT, REDIS_HOST, REDIS_PORT
 from datetime import date
 import os
 from flask_cors import CORS
@@ -7,18 +8,6 @@ from Models.ado import ADO
 from extensions import db
 # from api.Landingpage import landingPage
 # from api.Athlete import athlete
-
-
-
-
-# app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": "*"}})
-
-# app.register_blueprint(landingPage)
-# app.register_blueprint(athlete)
-
-
-
 
 
 
@@ -235,7 +224,6 @@ def register_ado():
             response['message'] = 'Athlete entry already exists'
             return jsonify(response)
 
-        print("slkfjslkf",flush=True)
         new_ado = ADO(email=email_, location=location_).make_dict()
         ado_collection.insert_one(new_ado)
 
@@ -250,4 +238,4 @@ def register_ado():
         return jsonify(response)
 
 if __name__ == '__main__':
-   app.run()
+    app.run(debug=True, host=FLASK_HOSTNAME, port=FLASK_PORT)
