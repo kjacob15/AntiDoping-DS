@@ -3,6 +3,7 @@ import os
 from flask_cors import CORS
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 from Models.athlete import Athlete
+from Models.ado import ADO
 from extensions import db
 # from api.Landingpage import landingPage
 # from api.Athlete import athlete
@@ -73,9 +74,7 @@ def register_athlete():
             response['message'] = 'Athlete entry already exists'
             return jsonify(response)
 
-
-        new_athlete = Athlete(email=email_, name=name_,
-                              location=location_, date=date_, time=time_).make_dict()
+        new_athlete = Athlete(email=email_, name=name_, location=location_, date=date_, time=time_).make_dict()
         athlete_collection.insert_one(new_athlete)
 
         response['status'] = 200
@@ -218,7 +217,37 @@ def find_athletes():
         response['message']= "Request failed" +e
         return response
 
+@app.route('/register_ado', methods=['POST'])
+def register_ado():
+    
+    response = {}
 
+    try:
+
+        email_ = request.form['email']
+        location_ = request.form['location']
+
+        ado_collection = db['ADO']
+
+        values= ado_collection.find({ "email": { "$eq": email_} })
+        if(len(list(values))>0):
+            response['status'] = 400
+            response['message'] = 'Athlete entry already exists'
+            return jsonify(response)
+
+        print("slkfjslkf",flush=True)
+        new_ado = ADO(email=email_, location=location_).make_dict()
+        ado_collection.insert_one(new_ado)
+
+        response['status'] = 200
+        response['message'] = 'ADO registered successfully'
+        return jsonify(response)
+
+    except Exception as e:
+        print(e)
+        response['status'] = 400
+        response['message'] = 'ADO could not be registered'
+        return jsonify(response)
 
 if __name__ == '__main__':
    app.run()
