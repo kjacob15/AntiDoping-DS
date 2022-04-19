@@ -220,6 +220,48 @@ def find_athletes():
         response['message']= "Request failed" +e
         return response
 
+@app.route('/istestassigned', methods=['GET'])
+def istestassigned():
+    response={}
+    try:
+        
+        email_ = request.args.get('email')
+        location = request.args.get('location')
+
+        if(location in EU_COUNTRY):
+             athlete_collection = db['EU_athlete']
+        else:
+             athlete_collection = db['US_athlete']
+
+        # if(not email_):
+        #     email_=""
+
+        # Query the DB
+        athletes = athlete_collection.find({"email": email_})
+        athletes_info = {}
+
+        count = 0
+        for athlete in athletes:
+            count += 1
+            athlete_info = {}
+            athlete_info['email'] = athlete['email']
+            athlete_info['name'] = athlete['name']
+            athlete_info['location'] = athlete['location']
+            athlete_info['date'] = athlete['date']
+            athlete_info['time'] = athlete['time']
+            athlete_index = 'athlete' + str(count)
+            if(athlete["isAuditAssigned"]==True):
+                athletes_info["Test_Assigned"]= "Yes"
+            else:
+                athletes_info["Test_Assigned"]= "No"
+            athletes_info[athlete_index] = athlete_info
+        return jsonify(athletes_info)
+    except Exception as e:
+        print(e)
+        response['message']= "Request failed" +e
+        return response
+
+
 @app.route('/register_ado', methods=['POST'])
 def register_ado():
     
