@@ -1,5 +1,6 @@
+from tkinter import E
 from constants import EU_COUNTRY, FLASK_HOSTNAME, FLASK_PORT, REDIS_HOST, REDIS_PORT
-from datetime import date
+from datetime import date, datetime
 import os
 from flask_cors import CORS
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
@@ -60,6 +61,11 @@ def register_athlete():
         time_= request.form['time']
         date_ = request.form['date']
 
+        if(datetime.strptime(date_,"%d/%m/%Y").date() <  today):
+            response['status'] = 400
+            response['message'] = 'Date has to be today or later'
+            return jsonify(response) 
+
         if(region=='EU'):
             athlete_collection = db['EU_athlete']
         else:
@@ -93,16 +99,21 @@ def deleteAthlete():
     try:
         email_ = request.form['email']
 
-        athlete_collection = db['EU_athlete']
-        print(email_)
-        query = {"email":email_}
-        print(query)
-        values = athlete_collection.find(query)
-        if(not len(list(values))>0):
+        location = request.args.get('location')
+        print(location)
+        if str(location) in EU_COUNTRY:
+            print("YEs")
+            athlete_collection = db['EU_athlete']
+        else:
+            print("No")
             athlete_collection = db['US_athlete']
-            values = athlete_collection.find(query)
+        
+        query = {"email":email_}
+        values = athlete_collection.find(query)
         print(values[0])
+        print("I came here 4")
         for i in values:
+            print("I came here 5")
             print(i)
             athlete_collection.delete_one(i)
         
@@ -122,20 +133,26 @@ def deleteAthlete():
 def edit_availability():
 
     response = {}
-
+    
     try:
         email_ = request.form['email']
         time_=request.form['time']
-
-        athlete_collection = db['EU_athlete']
+        location = request.args.get('location')
+        print(location)
+        if str(location) in EU_COUNTRY:
+            print("YEs")
+            athlete_collection = db['EU_athlete']
+        else:
+            print("No")
+            athlete_collection = db['US_athlete']
 
         query = {"email":email_}
         values= athlete_collection.find(query)
+        if values[0]["isAuditAssigned"] == True:
+            response['status'] = 400
+            response['message'] = 'Athelete update FAILED- Tester has been assigned'
+            return jsonify(response)
         
-        if(not len(list(values))>0):
-            athlete_collection = db['US_athlete']
-            values= athlete_collection.find(query)
-
         newvalues = { "$set": { "time": time_, "isAuditAssigned":False } }
         athlete_collection.update_one(values[0], newvalues)
 
@@ -144,6 +161,7 @@ def edit_availability():
         return jsonify(response)
 
     except Exception as e:
+        print(e)
         response['status'] = 400
         response['message'] = 'Athelete update FAILED'
         return jsonify(response)
@@ -174,6 +192,7 @@ def find_athletes_loc():
             athlete_info['location'] = athlete['location']
             athlete_info['date'] = athlete['date']
             athlete_info['time'] = athlete['time']
+            athlete_info['Tester Assigned'] = athlete['isAuditAssigned']
             athlete_index = 'athlete' + str(count)
             athletes_info[athlete_index] = athlete_info
         return jsonify(athletes_info)
@@ -247,13 +266,11 @@ def istestassigned():
             athlete_info['email'] = athlete['email']
             athlete_info['name'] = athlete['name']
             athlete_info['location'] = athlete['location']
-            athlete_info['date'] = athlete['date']
-            athlete_info['time'] = athlete['time']
             athlete_index = 'athlete' + str(count)
             if(athlete["isAuditAssigned"]==True):
-                athletes_info["Test_Assigned"]= "Yes"
+                athletes_info["Tester_Assigned"]= "Yes"
             else:
-                athletes_info["Test_Assigned"]= "No"
+                athletes_info["Tester_Assigned"]= "No"
             athletes_info[athlete_index] = athlete_info
         return jsonify(athletes_info)
     except Exception as e:
