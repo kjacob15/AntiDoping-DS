@@ -1,4 +1,4 @@
-from constants import FLASK_HOSTNAME, FLASK_PORT, REDIS_HOST, REDIS_PORT
+from constants import EU_COUNTRY, FLASK_HOSTNAME, FLASK_PORT, REDIS_HOST, REDIS_PORT
 from datetime import date
 import os
 from flask_cors import CORS
@@ -15,10 +15,18 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-@app.route('/')
-def index():
-   print('Request for index page received')
-   return render_template('index.html')
+@app.route('/', methods=['GET', 'POST'])
+def add():
+    return render_template('add.html')
+
+@app.route('/cancel', methods=['GET', 'POST'])
+def cancel():
+    return render_template('cancel.html')
+
+
+@app.route('/modify', methods=['GET', 'POST'])
+def modify():
+    return render_template('modify.html')
 
 @app.route('/favicon.ico')
 def favicon():
@@ -128,7 +136,7 @@ def edit_availability():
             athlete_collection = db['US_athlete']
             values= athlete_collection.find(query)
 
-        newvalues = { "$set": { "time": time_ } }
+        newvalues = { "$set": { "time": time_, "isAuditAssigned":False } }
         athlete_collection.update_one(values[0], newvalues)
 
         response['status'] = 200
@@ -147,11 +155,12 @@ def find_athletes_loc():
     try:
         
         location = request.args.get('location')
-        athlete_collection = db['athlete']
-
-        # if(not email_):
-        #     email_=""
-
+        if(location in EU_COUNTRY):
+             athlete_collection = db['EU_athlete']
+        else:
+             athlete_collection = db['US_athlete']
+        
+ 
         # Query the DB
         athletes = athlete_collection.find({"location": location})
         athletes_info = {}
@@ -180,7 +189,12 @@ def find_athletes():
     try:
         
         email_ = request.args.get('email')
-        athlete_collection = db['athlete']
+        location = request.args.get('location')
+
+        if(location in EU_COUNTRY):
+             athlete_collection = db['EU_athlete']
+        else:
+             athlete_collection = db['US_athlete']
 
         # if(not email_):
         #     email_=""
