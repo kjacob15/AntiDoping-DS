@@ -237,5 +237,35 @@ def register_ado():
         response['message'] = 'ADO could not be registered'
         return jsonify(response)
 
+@app.route('/show-assigned-atheltes', methods=['POST'])
+def show_assigned_atheltes():
+    
+    response = {}
+
+    try:
+
+        email_ = request.form['email']
+
+        ado_collection = db['ADO']
+        values = ado_collection.find({ "email": { "$eq": email_} })
+        if(values != None):
+            i = 0
+            for athelte in values[0]['assigned_athletes']:
+                response['athletes'+str(i)] = str(athelte)
+                i = i+1
+            response['status'] = 200
+            response['message'] = 'List of assigned athletes'
+            return jsonify(response)
+
+        response['status'] = 400
+        response['message'] = 'ADO does not exist'
+        return jsonify(response)
+
+    except Exception as e:
+        print(e)
+        response['status'] = 400
+        response['message'] = 'Something went wrong!'
+        return jsonify(response)
+
 if __name__ == '__main__':
     app.run(debug=True, host=FLASK_HOSTNAME, port=FLASK_PORT)
