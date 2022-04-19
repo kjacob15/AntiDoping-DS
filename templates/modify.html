@@ -82,21 +82,28 @@
 			.inputs{
 				grid-template-columns: repeat(1, 1fr);
 			}
-			.button{
-				position: absolute;
-				width: 80px;
-				height:50px;
-				left: 0;
-				right: 0;
-				margin: 0 auto;
-				display: inline-block;
-				background-color: var(--first);
-				color: #fff;
-				padding: 1rem;
-				border-radius: .5rem;
-				font-weight: 500;
-				display: inline-flex;
-				align-items: center;
+			.button {
+                position: absolute;
+                width: 80px;
+                height: 50px;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                display: inline-block;
+                background-color: var(--first);
+                color: #fff;
+                padding: 1rem;
+                border-radius: .5rem;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+            }
+            .input:invalid+span:after {
+			  content: '✖';
+			}
+
+			.input:valid+span:after {
+			  content: '✓';
 			}
 		</style>
 	</head>
@@ -115,8 +122,9 @@
 							<input type="date" class="input" >
 						</div>
 						<div class="contact_content">
-							<label for ="" class="label">Time</label>
-							<input type="time" class="input" >
+							<label for ="" class="label">Time（06:00 ~ 23:00）</label>
+							<input id="time" type="time" class="input" min="06:00" max="23:00" required>
+							<span class="validity"></span>
 						</div>
 						<div>
 							<a href="" class="button">
