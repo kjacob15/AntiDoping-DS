@@ -3,3 +3,5 @@ pymongo==4.1.0
 certifi==2021.5.30
 Flask-Cors==3.0.10
 python-dotenv==0.20.0
+uwsgi==2.0.14
+redis==4.2.2

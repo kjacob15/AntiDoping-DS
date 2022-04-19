@@ -1,11 +1,13 @@
 from constants import FLASK_HOSTNAME, FLASK_PORT, REDIS_HOST, REDIS_PORT
 from datetime import date
-import os
-from flask_cors import CORS
+
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
+from flask_cors import CORS
+
 from Models.athlete import Athlete
 from Models.ado import ADO
 from extensions import db
+import redis
 # from api.Landingpage import landingPage
 # from api.Athlete import athlete
 
@@ -14,31 +16,37 @@ from extensions import db
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-
+# Routes
+import routes
 @app.route('/')
 def index():
-   print('Request for index page received')
-   return render_template('index.html')
+    #replacing localhost with redis
+    r = redis.Redis(host='localhost',port=6379,db=0)
+    if r.ping():
+        print('Request for index page received')
+    return render_template('add.html')
+
 
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+
 @app.route('/hello', methods=['POST'])
 def hello():
-   name = request.form.get('name')
+    name = request.form.get('name')
 
-   if name:
-       print('Request for hello page received with name=%s' % name)
-       return render_template('hello.html', name = name)
-   else:
-       print('Request for hello page received with no name or blank name -- redirecting')
-       return redirect(url_for('index'))
+    if name:
+        print('Request for hello page received with name=%s' % name)
+        return render_template('hello.html', name=name)
+    else:
+        print('Request for hello page received with no name or blank name -- redirecting')
+        return redirect(url_for('index'))
+
 
 @app.route('/register_athlete', methods=['POST'])
 def register_athlete():
-    
     response = {}
 
     try:
@@ -47,18 +55,18 @@ def register_athlete():
 
         email_ = request.form['email']
         name_ = request.form['name']
-        region= request.form['region']
+        region = request.form['region']
         location_ = request.form['location']
-        time_= request.form['time']
+        time_ = request.form['time']
         date_ = request.form['date']
 
-        if(region=='EU'):
+        if (region == 'EU'):
             athlete_collection = db['EU_athlete']
         else:
             athlete_collection = db['US_athlete']
 
-        values= athlete_collection.find({ "email": { "$eq": email_} })
-        if(len(list(values))>0):
+        values = athlete_collection.find({"email": {"$eq": email_}})
+        if (len(list(values)) > 0):
             response['status'] = 400
             response['message'] = 'Athlete entry already exists'
             return jsonify(response)
@@ -68,6 +76,7 @@ def register_athlete():
 
         response['status'] = 200
         response['message'] = 'Athlete registered successfully'
+        print(email_)
         return jsonify(response)
 
     except Exception as e:
@@ -76,10 +85,10 @@ def register_athlete():
         response['message'] = 'Athlete could not be registered'
         return jsonify(response)
 
-#POST API to delete athlete info
+
+# POST API to delete athlete info
 @app.route('/delete_athlete', methods=["POST"])
 def deleteAthlete():
-
     response = {}
 
     try:
@@ -87,17 +96,16 @@ def deleteAthlete():
 
         athlete_collection = db['EU_athlete']
         print(email_)
-        query = {"email":email_}
+        query = {"email": email_}
         print(query)
         values = athlete_collection.find(query)
-        if(not len(list(values))>0):
+        if (not len(list(values)) > 0):
             athlete_collection = db['US_athlete']
             values = athlete_collection.find(query)
         print(values[0])
         for i in values:
             print(i)
             athlete_collection.delete_one(i)
-        
 
         response['status'] = 200
         response['message'] = 'Athelete deleted successfully'
@@ -109,26 +117,26 @@ def deleteAthlete():
         response['message'] = 'Athelete could not be deleted'
         return jsonify(response)
 
-#POST API to Modify the athlete availability
+
+# POST API to Modify the athlete availability
 @app.route('/edit_availability', methods=["POST"])
 def edit_availability():
-
     response = {}
 
     try:
         email_ = request.form['email']
-        time_=request.form['time']
+        time_ = request.form['time']
 
         athlete_collection = db['EU_athlete']
 
-        query = {"email":email_}
-        values= athlete_collection.find(query)
-        
-        if(not len(list(values))>0):
-            athlete_collection = db['US_athlete']
-            values= athlete_collection.find(query)
+        query = {"email": email_}
+        values = athlete_collection.find(query)
 
-        newvalues = { "$set": { "time": time_ } }
+        if (not len(list(values)) > 0):
+            athlete_collection = db['US_athlete']
+            values = athlete_collection.find(query)
+
+        newvalues = {"$set": {"time": time_}}
         athlete_collection.update_one(values[0], newvalues)
 
         response['status'] = 200
@@ -140,12 +148,13 @@ def edit_availability():
         response['message'] = 'Athelete update FAILED'
         return jsonify(response)
 
-#GET API to find all athletes in a region
+
+# GET API to find all athletes in a region
 @app.route('/find_athletes_loc', methods=['GET'])
 def find_athletes_loc():
-    response={}
+    response = {}
     try:
-        
+
         location = request.args.get('location')
         athlete_collection = db['athlete']
 
@@ -170,15 +179,16 @@ def find_athletes_loc():
         return jsonify(athletes_info)
     except Exception as e:
         print(e)
-        response['message']= "Request failed" +e
+        response['message'] = "Request failed" + e
         return response
 
-#GET API to find athlete by email
+
+# GET API to find athlete by email
 @app.route('/find_athletes', methods=['GET'])
 def find_athletes():
-    response={}
+    response = {}
     try:
-        
+
         email_ = request.args.get('email')
         athlete_collection = db['athlete']
 
@@ -203,7 +213,7 @@ def find_athletes():
         return jsonify(athletes_info)
     except Exception as e:
         print(e)
-        response['message']= "Request failed" +e
+        response['message'] = "Request failed" + e
         return response
 
 @app.route('/register_ado', methods=['POST'])
