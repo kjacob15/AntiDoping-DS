@@ -44,7 +44,6 @@ def register_athlete():
     try:
         today = date.today()
         # timestamp = date.now()
-
         email_ = request.form['email']
         name_ = request.form['name']
         region= request.form['region']
@@ -84,19 +83,30 @@ def deleteAthlete():
 
     try:
         email_ = request.form['email']
+        location_ = request.form['location']
 
-        athlete_collection = db['EU_athlete']
-        print(email_)
+        ado_collection = db['ADO']
+
         query = {"email":email_}
-        print(query)
-        values = athlete_collection.find(query)
-        if(not len(list(values))>0):
+
+        if location_ == 'USA' or  location_ == 'Canada' or location_ == 'Mexico':
             athlete_collection = db['US_athlete']
-            values = athlete_collection.find(query)
-        print(values[0])
-        for i in values:
-            print(i)
-            athlete_collection.delete_one(i)
+        else:
+             athlete_collection = db['EU_athlete']
+
+        values = athlete_collection.find(query)
+
+        if values[0]['isAuditAssigned'] == True:
+            query = {"email":values[0]['ADOId']}
+            ado = ado_collection.find(query)
+            new_assigned_athletes = []
+            for item in ado[0]['assigned_athletes']:
+                if item['email'] != email_:
+                    new_assigned_athletes.append(item)
+                    print(new_assigned_athletes,flush=True)
+            ado_collection.update_one( {"email":values[0]['ADOId']},{"$set" : {'assigned_athletes': new_assigned_athletes}})
+        query = {"email":email_}
+        athlete_collection.delete_one(query)
         
 
         response['status'] = 200
@@ -120,13 +130,19 @@ def edit_availability():
         time_=request.form['time']
 
         athlete_collection = db['EU_athlete']
+        ado_collection = db['ADO']
 
         query = {"email":email_}
-        values= athlete_collection.find(query)
-        
-        if(not len(list(values))>0):
+        values = athlete_collection.find(query)
+
+        if(values == None):
             athlete_collection = db['US_athlete']
-            values= athlete_collection.find(query)
+            values = athlete_collection.find(query)
+
+        if values == None:
+            response['status'] = 400
+            response['message'] = 'Athelete not found'
+            return jsonify(response)
 
         newvalues = { "$set": { "time": time_ } }
         athlete_collection.update_one(values[0], newvalues)
@@ -243,7 +259,7 @@ def show_assigned_atheltes():
     response = {}
 
     try:
-
+        #print(request.content)
         email_ = request.form['email']
 
         ado_collection = db['ADO']
@@ -265,6 +281,45 @@ def show_assigned_atheltes():
         print(e)
         response['status'] = 400
         response['message'] = 'Something went wrong!'
+        return jsonify(response)
+
+#POST API to delete athlete info
+@app.route('/delete_ado', methods=["POST"])
+def deleteADO():
+
+    response = {}
+
+    try:
+        email_ = request.form['email']
+
+        ado_collection = db['ADO']
+        query = {"email":email_}
+        ado = ado_collection.find(query)
+
+        if ado == None:
+            response['status'] = 400
+            response['message'] = 'ADO not found'
+            return jsonify(response)
+
+        for item in ado[0]['assigned_athletes']:
+            if item['location'] == 'USA' or item['location'] == 'Canada' or item['location'] == 'Mexico':
+                athlete_collection = db['US_athlete']
+                athlete_collection.update_one( {"email":item['email']},{"$set" : {'isAuditAssigned': False, "ADOId" : ""}})
+            else:
+                athlete_collection = db['EU_athlete']
+                athlete_collection.update_one( {"email":item['email']},{"$set" : {'isAuditAssigned': False, "ADOId" : ""}})
+
+        query = {"email":email_}
+        ado_collection.delete_one(query)
+        
+        response['status'] = 200
+        response['message'] = 'ADO deleted successfully'
+        return jsonify(response)
+
+    except Exception as e:
+        print(e)
+        response['status'] = 400
+        response['message'] = 'ADO could not be deleted'
         return jsonify(response)
 
 if __name__ == '__main__':
