@@ -146,6 +146,9 @@ def reach_quota(ado , assigned_athletes):
     if len(assigned_athletes) >= 3:
         return_value = True
 
+    if len(ado['assigned_athletes']) + len(assigned_athletes) >= 3:
+        return_value = True
+
     #if(return_value):
     #    print('\033[1;34;40m', datetime.now(), f'ADO {ado_email} has reached its quota.')
 
@@ -153,9 +156,10 @@ def reach_quota(ado , assigned_athletes):
 
 
 def assign_ado_to_athlete(new_athlete, ado):
-    newvalues = { "$set": { "isAuditAssigned" : True } }
+    newvalues = { "$set": { "isAuditAssigned" : True, "ADOId" : ado['email'] } }
     EU_athlete_collection.update_one(new_athlete, newvalues)
     new_athlete['isAuditAssigned'] = True
+    new_athlete['ADOId'] = ado['email']
     athlete_ado_printer(new_athlete,ado)
     sleep(2)
 
@@ -192,6 +196,7 @@ def EU_assigner():
 
 if __name__ == '__main__':
     EU_athlete_collection.update_many({}, {"$set" : {'isAuditAssigned': False}})
+    EU_athlete_collection.update_many({}, {"$set" : {'ADOId': ''}})
     ado_collection.update_many({},{"$set" : {'assigned_athletes': []}})
 
     count = 0

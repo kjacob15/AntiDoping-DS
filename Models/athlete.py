@@ -6,6 +6,7 @@ class Athlete():
     date=''
     time = ''
     isAuditAssigned = False
+    ADOId = ''
 
     def __init__(self, email, name, location, date, time):
 
@@ -23,5 +24,6 @@ class Athlete():
         athelte_info['date'] = str(self.date)
         athelte_info['time'] = str(self.time)
         athelte_info['isAuditAssigned']= self.isAuditAssigned
+        athelte_info['ADOId']= self.ADOId
         
         return athelte_info

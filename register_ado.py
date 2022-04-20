@@ -9,7 +9,7 @@ Countries = ['USA', 'Canada', 'Mexico','UK', 'Ireland', 'Germany', 'France', 'Sw
 def generate_athelte(number):
 	for i in range(number):
 
-		location = Countries[(random.randint(0, 9))]
+		location = Countries[(random.randint(0, 8))]
 
 		user_id = str(random.randint(100,10000))
 
